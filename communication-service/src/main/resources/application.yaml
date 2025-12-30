@@ -1,0 +1,47 @@
+server:
+  port: ${COMMUNICATION-SERVICE-PORT:3001}
+
+spring:
+  application:
+    name: COMMUNICATION-SERVICE
+  main:
+    banner-mode: off
+  jackson:
+    default-property-inclusion: non_null
+  config:
+    import: classpath:db-config.yaml, queue-config.yaml
+  # for health check
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASSWORD:guest}
+
+management:
+  health:
+    rabbit:
+      enabled: ${QUEUE_ENABLED:false}
+
+
+mail:
+  enabled: ${MAIL_ENABLED:false}
+  defaultFrom: ${MAIL_FROM:no-reply@corems.com}
+  host: ${MAIL_HOST}
+  port: ${MAIL_PORT}
+  username: ${MAIL_USERNAME}
+  password: ${MAIL_PASSWORD}
+  protocol: ${MAIL_PROTOCOL:SMTPS} # SMTPS (recommended) or SMTP
+  properties:
+    mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+    mail.smtp.starttls.enable: ${MAIL_STARTTLS:true}
+
+slack:
+  enabled: ${SLACK_ENABLED:false}
+  senderApp: ${SLACK_SENDER_APP:CoreMS}
+  token: ${SLACK_BOT_TOKEN}
+
+sms:
+  enabled: ${SMS_ENABLED:false}
+  accountSid: ${SMS_ACCOUNT_SID}
+  authToken: ${SMS_AUTH_TOKEN}
+  fromNumber: ${SMS_FROM_NUMBER}
