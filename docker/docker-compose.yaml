@@ -1,0 +1,22 @@
+services:
+  communication-ms:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "3001:3001"
+    env_file:
+      - ../.env
+    environment:
+      # Override database URL to use host.docker.internal for Docker
+      - DATABASE_URL=jdbc:postgresql://host.docker.internal:5432/corems
+      # Override RabbitMQ host to use host.docker.internal for Docker
+      - RABBIT_HOST=host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - corems-network
+
+networks:
+  corems-network:
+    external: true
