@@ -22,6 +22,7 @@ management:
     rabbit:
       enabled: ${QUEUE_ENABLED:false}
 
+documentms.base-url: ${DOCUMENT-SERVICE-BASE-URL:http://localhost:3002}
 
 mail:
   enabled: ${MAIL_ENABLED:false}

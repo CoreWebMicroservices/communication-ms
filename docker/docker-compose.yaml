@@ -12,6 +12,8 @@ services:
       - DATABASE_URL=jdbc:postgresql://host.docker.internal:5432/corems
       # Override RabbitMQ host to use host.docker.internal for Docker
       - RABBIT_HOST=host.docker.internal
+      # Override document service URL for Docker
+      - DOCUMENT-SERVICE-BASE-URL=http://document-ms:3002
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
