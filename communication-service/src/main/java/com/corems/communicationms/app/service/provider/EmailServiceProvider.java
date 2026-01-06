@@ -33,7 +33,12 @@ public class EmailServiceProvider implements ChannelProvider<EmailPayload> {
 
     @Override
     public void convertAndSend(Object payload) {
-        send(objectMapper.convertValue(payload, EmailPayload.class));
+        try {
+            send(objectMapper.readValue((String) payload, EmailPayload.class));
+        } catch (Exception ex) {
+            log.error("Failed to convert and send email message: {}", ex.getMessage());
+            throw ServiceException.of(DefaultExceptionReasonCodes.SERVER_ERROR, "Unable to send email message.");
+        }
     }
 
     @Override

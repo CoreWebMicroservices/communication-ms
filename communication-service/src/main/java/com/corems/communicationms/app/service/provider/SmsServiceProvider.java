@@ -34,7 +34,12 @@ public class SmsServiceProvider implements ChannelProvider<SmsPayload> {
 
     @Override
     public void convertAndSend(Object payload) {
-        send(objectMapper.convertValue(payload, SmsPayload.class));
+        try {
+            send(objectMapper.readValue((String) payload, SmsPayload.class));
+        } catch (Exception ex) {
+            log.error("Failed to convert and send SMS message: ", ex);
+            throw ServiceException.of(DefaultExceptionReasonCodes.SERVER_ERROR, "Unable to send SMS message.");
+        }
     }
 
     @Override

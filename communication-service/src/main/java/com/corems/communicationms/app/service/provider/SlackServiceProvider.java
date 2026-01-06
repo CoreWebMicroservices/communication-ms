@@ -35,8 +35,14 @@ public class SlackServiceProvider implements ChannelProvider<SlackPayload> {
 
     @Override
     public void convertAndSend(Object payload) {
-        send(objectMapper.convertValue(payload, SlackPayload.class));
+        try {
+            send(objectMapper.readValue((String) payload, SlackPayload.class));
+        } catch (IOException ex) {
+            log.error("Unable to convert and send slack message: ", ex);
+            throw ServiceException.of(DefaultExceptionReasonCodes.SERVER_ERROR, "Unable to convert and send slack message.");
+        }
     }
+   
 
     @Override
     public void send(SlackPayload payload) {
