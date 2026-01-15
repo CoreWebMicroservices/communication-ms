@@ -43,7 +43,6 @@ class CommunicationMsApiIntegrationTest {
     @Autowired
     private NotificationsApi notificationsApi;
 
-    private static final String TEST_TOKEN_ID = UUID.randomUUID().toString();
     private static final UUID TEST_USER_ID = UUID.randomUUID();
     private static final UUID TEST_ADMIN_ID = UUID.randomUUID();
     private static final String TEST_USER_EMAIL = "testuser@example.com";
@@ -51,13 +50,12 @@ class CommunicationMsApiIntegrationTest {
 
     private String createToken(UUID userId, String email, List<String> roles) {
         Map<String, Object> claims = Map.of(
-            TokenProvider.CLAIM_USER_ID, userId.toString(),
             TokenProvider.CLAIM_EMAIL, email,
             TokenProvider.CLAIM_FIRST_NAME, "Test",
             TokenProvider.CLAIM_LAST_NAME, "User",
             TokenProvider.CLAIM_ROLES, roles
         );
-        return tokenProvider.createAccessToken(TEST_TOKEN_ID, claims);
+        return tokenProvider.createAccessToken(userId.toString(), claims);
     }
 
     private void authenticateAsUser() {
