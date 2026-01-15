@@ -30,13 +30,12 @@ public class DocumentStreamSource implements InputStreamSource {
         try {
             var meta = documentApi.getDocumentMetadata(documentUuid);
             if (meta != null && meta.getSize() != null && meta.getSize() <= maxInMemory) {
-                byte[] bytes = documentApi.streamDocumentByUuidWithResponseSpec(documentUuid).body(byte[].class);
+                byte[] bytes = documentApi.downloadDocumentByUuidWithResponseSpec(documentUuid).body(byte[].class);
                 if (bytes == null) throw ServiceException.of(DefaultExceptionReasonCodes.SERVER_ERROR, "Empty document: " + documentUuid);
                 return new ByteArrayInputStream(bytes);
             }
 
-            // fallback - stream to a temp file once and return a fresh FileInputStream
-            File tmp = documentApi.streamDocumentByUuid(documentUuid);
+            File tmp = documentApi.downloadDocumentByUuid(documentUuid);
             if (tmp == null || !tmp.exists()) throw ServiceException.of(DefaultExceptionReasonCodes.SERVER_ERROR, "Document content unavailable: " + documentUuid);
             return new FileInputStream(tmp);
         } catch (Exception ex) {
