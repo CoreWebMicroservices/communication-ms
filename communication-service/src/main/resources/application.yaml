@@ -9,7 +9,7 @@ spring:
   jackson:
     default-property-inclusion: non_null
   config:
-    import: classpath:db-config.yaml, queue-config.yaml
+    import: classpath:db-config.yaml, security-config.yaml, queue-config.yaml
   # for health check
   rabbitmq:
     host: ${RABBIT_HOST:localhost}

@@ -1,0 +1,13 @@
+spring:
+  security:
+    cors:
+      allowedOrigins: http://localhost:8080
+    jwt:
+      algorithm: ${AUTH_TOKEN_ALG:HS256}
+      issuer: ${AUTH_TOKEN_ISSUER:corems}
+      keyId: ${JWT_KEY_ID:corems-1}
+      secretKey: ${AUTH_TOKEN_SECRET}
+      privateKey: ${JWT_PRIVATE_KEY}
+      publicKey: ${JWT_PUBLIC_KEY}
+      refreshExpirationTimeInMinutes: 1440
+      accessExpirationTimeInMinutes: 10
