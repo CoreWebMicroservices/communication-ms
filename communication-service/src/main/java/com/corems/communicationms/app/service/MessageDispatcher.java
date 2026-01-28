@@ -29,6 +29,7 @@ public class MessageDispatcher {
             QueueMessage qm = new QueueMessage();
             qm.setId(messageId.toString());
             qm.setType(channelProvider.getMessageType().toString());
+            qm.withUserFromSecurityContext();
 
             try {
                 qm.setPayload(objectMapper.writeValueAsString(payload));
@@ -38,13 +39,13 @@ public class MessageDispatcher {
             
             queueClient.send(qm);
             
-            log.info("Message dispatched to queue: messageId={}, type={}, correlationId={}", 
-                    messageId, channelProvider.getMessageType(), qm.getCorrelationId());
+            log.info("Message dispatched to queue: messageId={}, type={}, correlationId={}, userId={}", 
+                    messageId, channelProvider.getMessageType(), qm.getCorrelationId(), 
+                    qm.getUser() != null ? qm.getUser().getUserId() : null);
             
             return MessageStatus.enqueued;
         }
 
-        // Direct send without queue
         channelProvider.send(payload);
         log.info("Message sent directly: messageId={}, type={}", 
                 messageId, channelProvider.getMessageType());

@@ -13,14 +13,12 @@ servers:
   - url: /
     description: Default server
 
-
 tags:
   - name: Messages
     description: Operations for client messages (SMS, Email) - stored in database
   - name: Notifications
     description: Operations for system notifications (Slack, SMS, Email) - not stored in database
 
-# common error responses convenience anchor (references common API responses)
 x-common-error-responses: &common-error-responses
   '400':
     $ref: '.gen/common-api.yaml#/components/responses/ValidationError'
@@ -33,7 +31,6 @@ x-common-error-responses: &common-error-responses
   '500':
     $ref: '.gen/common-api.yaml#/components/responses/InternalServerError'
 
-# Require bearer auth for all operations by default
 security:
   - bearerAuth: []
 
@@ -71,6 +68,7 @@ paths:
       description: |
         Send an SMS message to a client. Only admins can send messages.
         The request body MUST include userId to specify the recipient.
+        Either message or templateId must be provided.
       operationId: sendSmsMessage
       requestBody:
         required: true
@@ -95,6 +93,7 @@ paths:
       description: |
         Send an email message to a client. Only admins can send messages.
         The request body MUST include userId to specify the recipient.
+        Either body or templateId must be provided.
       operationId: sendEmailMessage
       requestBody:
         required: true
@@ -143,6 +142,7 @@ paths:
       description: |
         Send a system notification via SMS. Only admins can send notifications.
         Notifications are not stored in the database and are not visible to clients.
+        Either message or templateId must be provided.
       operationId: sendSmsNotification
       requestBody:
         required: true
@@ -167,6 +167,7 @@ paths:
       description: |
         Send a system notification via email. Only admins can send notifications.
         Notifications are not stored in the database and are not visible to clients.
+        Either body or templateId must be provided.
       operationId: sendEmailNotification
       requestBody:
         required: true
@@ -190,7 +191,6 @@ components:
       required:
         - payloadType
         - phoneNumber
-        - message
       properties:
         payloadType:
           type: string
@@ -207,13 +207,17 @@ components:
           description: >
             SMS text body. Max 1600 chars accepted (concatenated messages).
             Single-part SMS typical max: 160 chars (GSM-7) or 70 (UCS-2).
+            Either message or template must be provided.
+        template:
+          $ref: '#/components/schemas/TemplateRequest'
+          description: Template to render for the message body. Either message or template must be provided.
+
     EmailPayload:
       type: object
       required:
         - payloadType
         - recipient
         - subject
-        - body
       properties:
         payloadType:
           type: string
@@ -266,7 +270,12 @@ components:
           type: string
           minLength: 1
           maxLength: 10000
-          description: Body content of the message
+          description: >
+            Body content of the message.
+            Either body or template must be provided.
+        template:
+          $ref: '#/components/schemas/TemplateRequest'
+          description: Template to render for the email body. Either body or template must be provided.
         documentUuids:
           type: array
           items:
@@ -275,6 +284,23 @@ components:
           description: Optional list of document UUIDs to attach to the outgoing email
           example:
             - "7f1e1d9a-0000-4000-8000-000000000000"
+
+    TemplateRequest:
+      type: object
+      required:
+        - templateId
+      properties:
+        templateId:
+          type: string
+          description: Unique template identifier (e.g., welcome-email)
+        params:
+          type: object
+          additionalProperties: true
+          description: Template parameters for rendering. Optional.
+        language:
+          type: string
+          description: Template language (e.g., en, no). Optional - defaults to configured default language if not provided.
+
     SlackPayload:
       type: object
       required:
@@ -290,7 +316,6 @@ components:
           minLength: 1
           description: Slack message text
 
-    # Common Message request schemas
     MessageCommon:
       type: object
       required:
@@ -311,7 +336,6 @@ components:
         - $ref: '#/components/schemas/MessageCommon'
         - $ref: '#/components/schemas/EmailPayload'
 
-    # Common Notification request schemas (with optional level)
     NotificationCommon:
       type: object
       properties:
@@ -412,7 +436,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/MessageResponse'
-
 
   securitySchemes:
     bearerAuth:

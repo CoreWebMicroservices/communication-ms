@@ -39,23 +39,11 @@ public class MessagesController implements MessagesApi {
             Optional<String> sort,
             Optional<String> search,
             Optional<List<String>> filter) {
-
+        
+            
         UserPrincipal userPrincipal = SecurityUtils.getUserPrincipal();
 
-        EnumSet<CoreMsRoles> privileged = EnumSet.copyOf(CoreMsRoles.getSystemRoles());
-        privileged.add(CoreMsRoles.COMMUNICATION_MS_ADMIN);
-
-        boolean isAdmin = userPrincipal.getAuthorities().stream()
-                .anyMatch(granted -> {
-                    try {
-                        CoreMsRoles role = CoreMsRoles.valueOf(granted.getAuthority());
-                        return privileged.contains(role);
-                    } catch (IllegalArgumentException | NullPointerException ex) {
-                        return false;
-                    }
-                });
-
-        UUID userScope = isAdmin ? null : userPrincipal.getUserId();
+        UUID userScope = SecurityUtils.hasRole(CoreMsRoles.COMMUNICATION_MS_ADMIN) ? null : userPrincipal.getUserId();
 
         MessageListResponse resp = this.messagingService.listMessages(
                 userScope,

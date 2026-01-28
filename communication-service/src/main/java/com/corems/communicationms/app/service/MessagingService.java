@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import com.corems.common.utils.db.utils.QueryParams;
 
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -91,9 +92,9 @@ public class MessagingService {
         EmailPayload ep = new EmailPayload(
                 ChannelType.EMAIL.getValue(),
                 emailEntity.getSubject(),
-                emailEntity.getRecipient(),
-                emailEntity.getBody()
+                emailEntity.getRecipient()
         );
+        ep.setBody(emailEntity.getBody());
         if (emailEntity.getEmailType() != null) {
             try {
                 ep.setEmailType(EmailPayload.EmailTypeEnum.fromValue(emailEntity.getEmailType()));
@@ -104,7 +105,7 @@ public class MessagingService {
         if (emailEntity.getSender() != null) ep.setSender(emailEntity.getSender());
         if (emailEntity.getSenderName() != null) ep.setSenderName(emailEntity.getSenderName());
         if (emailEntity.getCc() != null && !emailEntity.getCc().isBlank()) {
-            List<String> cc = java.util.Arrays.stream(emailEntity.getCc().split(","))
+            List<String> cc = Arrays.stream(emailEntity.getCc().split(","))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
                     .toList();
@@ -121,6 +122,8 @@ public class MessagingService {
     }
 
     public SmsPayload mapSms(SMSMessageEntity smsEntity) {
-        return new SmsPayload(ChannelType.SMS.getValue(), smsEntity.getPhoneNumber(), smsEntity.getMessage());
+        SmsPayload sp = new SmsPayload(ChannelType.SMS.getValue(), smsEntity.getPhoneNumber());
+        sp.setMessage(smsEntity.getMessage());
+        return sp;
     }
 }

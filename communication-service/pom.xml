@@ -134,6 +134,12 @@
             <artifactId>document-client</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- template client to call Template MS -->
+        <dependency>
+            <groupId>com.corems.templatems</groupId>
+            <artifactId>template-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

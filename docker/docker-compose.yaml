@@ -14,6 +14,8 @@ services:
       - RABBIT_HOST=host.docker.internal
       # Override document service URL for Docker
       - DOCUMENT-SERVICE-BASE-URL=http://document-ms:3002
+      # Override template service URL for Docker
+      - TEMPLATE-SERVICE-BASE-URL=http://template-ms:3004
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:

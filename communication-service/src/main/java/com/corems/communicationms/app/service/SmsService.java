@@ -6,6 +6,7 @@ import com.corems.communicationms.api.model.ChannelType;
 import com.corems.communicationms.api.model.SmsMessageRequest;
 import com.corems.communicationms.api.model.SmsNotificationRequest;
 import com.corems.communicationms.api.model.SmsPayload;
+import com.corems.communicationms.api.model.TemplateRequest;
 import com.corems.communicationms.api.model.MessageResponse;
 import com.corems.communicationms.api.model.NotificationResponse;
 import com.corems.communicationms.api.model.SendStatus;
@@ -15,6 +16,8 @@ import com.corems.communicationms.app.model.MessageSenderType;
 import com.corems.communicationms.app.repository.MessageRepository;
 import com.corems.communicationms.app.service.provider.SmsServiceProvider;
 import com.corems.common.security.UserPrincipal;
+import com.corems.templatems.client.TemplateRenderingApi;
+import com.corems.templatems.api.model.RenderTemplateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,6 +27,7 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 
 import com.corems.communicationms.api.model.MessageResponse.SentByTypeEnum;
+import com.corems.common.exception.handler.DefaultExceptionReasonCodes;
 
 @Slf4j
 @Component
@@ -32,10 +36,13 @@ public class SmsService {
     private final MessageRepository messageRepository;
     private final SmsServiceProvider smsServiceProvider;
     private final MessageDispatcher messageDispatcher;
+    private final TemplateRenderingApi templateRenderingApi;
 
     public MessageResponse sendMessage(SmsMessageRequest smsRequest) {
-        SMSMessageEntity smsEntity = createEntity(smsRequest);
-        SmsPayload payload = getPayload(smsRequest);
+        String message = resolveMessage(smsRequest.getMessage(), smsRequest.getTemplate());
+        
+        SMSMessageEntity smsEntity = createEntity(smsRequest, message);
+        SmsPayload payload = getPayload(smsRequest.getPhoneNumber(), message);
         try {
             MessageStatus status = messageDispatcher.dispatchMessage(smsServiceProvider, smsEntity.getUuid(), payload);
             smsEntity.setStatus(status);
@@ -66,7 +73,8 @@ public class SmsService {
 
     public NotificationResponse sendNotification(SmsNotificationRequest smsRequest) {
         try {
-            SmsPayload payload = getPayload(smsRequest);
+            String message = resolveMessage(smsRequest.getMessage(), smsRequest.getTemplate());
+            SmsPayload payload = getPayload(smsRequest.getPhoneNumber(), message);
             MessageStatus status = messageDispatcher.dispatchMessage(smsServiceProvider, UUID.randomUUID(), payload);
 
             NotificationResponse response = new NotificationResponse();
@@ -80,19 +88,49 @@ public class SmsService {
         }
     }
 
-    private SmsPayload getPayload(SmsMessageRequest smsRequest) {
-        return new SmsPayload(ChannelType.SMS.getValue(), smsRequest.getPhoneNumber(), smsRequest.getMessage());
+    private String resolveMessage(String message, TemplateRequest templateRequest) {
+        if (message != null && !message.isBlank()) {
+            return message;
+        }
+        
+        if (templateRequest != null) {
+            try {
+                var renderRequest = new RenderTemplateRequest();
+                if (templateRequest.getParams() != null) {
+                    renderRequest.setParams(templateRequest.getParams());
+                }
+                var renderResult = templateRenderingApi.renderTemplate(
+                    templateRequest.getTemplateId(),
+                    renderRequest,
+                    templateRequest.getLanguage()
+                );
+                return renderResult.getHtml();
+            } catch (Exception e) {
+                log.error("Failed to render template: {}", e.getMessage());
+                throw ServiceException.of(
+                    DefaultExceptionReasonCodes.SERVER_ERROR,
+                    "Failed to render template: " + e.getMessage()
+                );
+            }
+        }
+        
+        throw ServiceException.of(
+            DefaultExceptionReasonCodes.INVALID_REQUEST,
+            "Either message or template must be provided"
+        );
     }
 
-    private SmsPayload getPayload(SmsNotificationRequest smsRequest) {
-        return new SmsPayload(ChannelType.SMS.getValue(), smsRequest.getPhoneNumber(), smsRequest.getMessage());
+    private SmsPayload getPayload(String phoneNumber, String message) {
+        SmsPayload payload = new SmsPayload("sms", phoneNumber);
+        payload.setMessage(message);
+        return payload;
     }
 
-    private SMSMessageEntity createEntity(SmsMessageRequest smsRequest) {
+    private SMSMessageEntity createEntity(SmsMessageRequest smsRequest, String message) {
         SMSMessageEntity smsEntity = new SMSMessageEntity();
         smsEntity.setUuid(UUID.randomUUID());
         smsEntity.setPhoneNumber(smsRequest.getPhoneNumber());
-        smsEntity.setMessage(smsRequest.getMessage());
+        smsEntity.setMessage(message);
         smsEntity.setUserId(smsRequest.getUserId());
         smsEntity.setCreatedAt(Instant.now());
         smsEntity.setStatus(MessageStatus.created);

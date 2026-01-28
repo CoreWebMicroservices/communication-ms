@@ -24,6 +24,8 @@ management:
 
 documentms.base-url: ${DOCUMENT-SERVICE-BASE-URL:http://localhost:3002}
 
+templatems.base-url: ${TEMPLATE-SERVICE-BASE-URL:http://localhost:3004}
+
 mail:
   enabled: ${MAIL_ENABLED:false}
   defaultFrom: ${MAIL_FROM:no-reply@corems.com}
@@ -46,3 +48,13 @@ sms:
   accountSid: ${SMS_ACCOUNT_SID}
   authToken: ${SMS_AUTH_TOKEN}
   fromNumber: ${SMS_FROM_NUMBER}
+
+# Email notification templates
+notifications:
+  email-templates:
+    welcome: ${TEMPLATE_ID_WELCOME:welcome-email}
+    email-verification: ${TEMPLATE_ID_EMAIL_VERIFICATION:email-verification}
+    password-reset: ${TEMPLATE_ID_PASSWORD_RESET:password-reset-email}
+  sms-templates:
+    welcome: ${TEMPLATE_ID_SMS_WELCOME:sms-welcome}
+    verification-code: ${TEMPLATE_ID_SMS_VERIFICATION:sms-verification}

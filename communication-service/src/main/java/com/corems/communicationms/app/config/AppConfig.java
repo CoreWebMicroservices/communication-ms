@@ -10,7 +10,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 @EnableConfigurationProperties({MailConfig.class, SlackConfig.class, SmsConfig.class})
 public class AppConfig {
 
-    public final MailConfig mailConfig;
+    private final MailConfig mailConfig;
 
     public AppConfig(MailConfig mailConfig) {
         this.mailConfig = mailConfig;
