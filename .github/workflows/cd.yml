@@ -1,0 +1,32 @@
+name: CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: 'dev'
+      image-tag:
+        description: 'Docker image tag (or "build" for fresh build)'
+        required: false
+        type: string
+        default: 'latest'
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment }}
+    uses: CoreWebMicroservices/corems-project/.github/workflows/java-service-cd.yml@main
+    with:
+      service-name: 'communication-ms'
+      environment: ${{ github.event.inputs.environment }}
+      image-tag: ${{ github.event.inputs.image-tag }}
+      docker-registry: 'ghcr.io'
+      java-version: '25'
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      docker-password: ${{ secrets.GITHUB_TOKEN }}

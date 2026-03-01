@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  ci:
+    name: Build and Test
+    uses: CoreWebMicroservices/corems-project/.github/workflows/java-service-ci.yml@main
+    with:
+      service-name: 'communication-ms'
+      java-version: '25'
+      build-docker: true
+      push-docker: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      docker-registry: 'ghcr.io'
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      docker-password: ${{ secrets.GITHUB_TOKEN }}
