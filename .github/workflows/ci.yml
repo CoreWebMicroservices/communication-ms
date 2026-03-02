@@ -10,6 +10,10 @@ on:
       - main
       - develop
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   ci:
     name: Build and Test
@@ -17,9 +21,10 @@ jobs:
     with:
       service-name: 'communication-ms'
       java-version: '25'
+      publish-clients: true
       build-docker: true
       push-docker: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       docker-registry: 'ghcr.io'
     secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      github-token: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
       docker-password: ${{ secrets.GITHUB_TOKEN }}

@@ -17,6 +17,10 @@ on:
         type: string
         default: 'latest'
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   deploy:
     name: Deploy to ${{ github.event.inputs.environment }}
@@ -28,5 +32,5 @@ jobs:
       docker-registry: 'ghcr.io'
       java-version: '25'
     secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      github-token: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
       docker-password: ${{ secrets.GITHUB_TOKEN }}

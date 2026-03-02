@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   release:
     name: Release Version
@@ -14,5 +18,5 @@ jobs:
       java-version: '25'
       docker-registry: 'ghcr.io'
     secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      github-token: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
       docker-password: ${{ secrets.GITHUB_TOKEN }}

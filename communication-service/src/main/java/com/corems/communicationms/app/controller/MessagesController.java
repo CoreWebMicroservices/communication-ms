@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,10 +38,8 @@ public class MessagesController implements MessagesApi {
             Optional<String> sort,
             Optional<String> search,
             Optional<List<String>> filter) {
-        
-            
+                
         UserPrincipal userPrincipal = SecurityUtils.getUserPrincipal();
-
         UUID userScope = SecurityUtils.hasRole(CoreMsRoles.COMMUNICATION_MS_ADMIN) ? null : userPrincipal.getUserId();
 
         MessageListResponse resp = this.messagingService.listMessages(
