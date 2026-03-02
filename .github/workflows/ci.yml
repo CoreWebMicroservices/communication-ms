@@ -9,6 +9,38 @@ on:
     branches:
       - main
       - develop
+  workflow_dispatch:
+    inputs:
+      build-api:
+        description: 'Build API module'
+        required: false
+        type: boolean
+        default: true
+      build-client:
+        description: 'Build Client module'
+        required: false
+        type: boolean
+        default: true
+      build-service:
+        description: 'Build Service module'
+        required: false
+        type: boolean
+        default: true
+      run-tests:
+        description: 'Run unit tests'
+        required: false
+        type: boolean
+        default: true
+      build-docker:
+        description: 'Build Docker image'
+        required: false
+        type: boolean
+        default: true
+      push-docker:
+        description: 'Push Docker image to registry'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -21,9 +53,12 @@ jobs:
     with:
       service-name: 'communication-ms'
       java-version: '25'
-      publish-clients: true
-      build-docker: true
-      push-docker: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      build-api: ${{ github.event_name == 'workflow_dispatch' && inputs.build-api || true }}
+      build-client: ${{ github.event_name == 'workflow_dispatch' && inputs.build-client || true }}
+      build-service: ${{ github.event_name == 'workflow_dispatch' && inputs.build-service || true }}
+      run-tests: ${{ github.event_name == 'workflow_dispatch' && inputs.run-tests || true }}
+      build-docker: ${{ github.event_name == 'workflow_dispatch' && inputs.build-docker || true }}
+      push-docker: ${{ github.event_name == 'workflow_dispatch' && inputs.push-docker || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
       docker-registry: 'ghcr.io'
     secrets:
       github-token: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
